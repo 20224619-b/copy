@@ -1,0 +1,64 @@
+﻿@startuml Singleton - Prisma y EventEmitter
+
+skinparam classAttributeIconSize 0
+skinparam backgroundColor white
+skinparam classBorderColor #444444
+skinparam classBackgroundColor #f5f5f5
+skinparam classFontColor #111111
+skinparam arrowColor #222222
+skinparam noteBackgroundColor #fffde7
+skinparam noteBorderColor #aaaaaa
+skinparam noteFontColor #333333
+
+title Patrón Singleton — PrismaClient y EventEmitter (Backend)
+
+class PrismaClient <<(S,#ef4444) Singleton>> {
+  - {static} _instance: PrismaClient
+  --
+  + {static} getInstance(): PrismaClient
+  + ejercicio: Repository
+  + usuario: Repository
+  + ejercicioActivo: Repository
+  .. etc ..
+}
+
+class EventEmitter <<(S,#ef4444) Singleton>> {
+  - {static} _instance: EventEmitter
+  --
+  + {static} getInstance(): EventEmitter
+  + emit(event: string, payload: any): void
+  + on(event: string, listener: Function): void
+}
+
+class EVENTS <<(E,#fbbf24) Enum>> {
+  + EXERCISE_COMPLETED
+  + REWARD_GRANTED
+}
+
+class prisma_js <<(M,#94a3b8) module: lib/prisma.js>> {
+  module.exports = new PrismaClient()
+}
+
+class events_js <<(M,#94a3b8) module: lib/events.js>> {
+  module.exports = { emitter, EVENTS }
+}
+
+PrismaClient <.. prisma_js : exporta instancia única
+EventEmitter <.. events_js : exporta instancia única
+EVENTS <.. events_js : exporta catálogo
+
+note right of prisma_js
+  Node.js cachea módulos require().
+  El mismo objeto PrismaClient se
+  reutiliza en toda la aplicación,
+  evitando múltiples conexiones a la BD.
+end note
+
+note right of events_js
+  Bus de eventos central.
+  Los servicios emiten eventos
+  y los listeners reaccionan
+  sin acoplarse directamente.
+end note
+
+@enduml

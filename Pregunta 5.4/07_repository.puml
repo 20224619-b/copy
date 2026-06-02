@@ -1,0 +1,59 @@
+﻿@startuml Repository - Capa de acceso a datos
+
+skinparam classAttributeIconSize 0
+skinparam backgroundColor white
+skinparam classBorderColor #444444
+skinparam classBackgroundColor #f5f5f5
+skinparam classFontColor #111111
+skinparam arrowColor #222222
+skinparam noteBackgroundColor #fffde7
+skinparam noteBorderColor #aaaaaa
+skinparam noteFontColor #333333
+
+title Patrón Repository — Capa de datos (Backend)
+
+class ExerciseService <<Service>> {
+  + submitAttempt(params)
+  + assignExercise(userId, ejId)
+  + getById(id)
+}
+
+class ExerciseRepository <<Repository>> {
+  + list(where): Promise<Ejercicio[]>
+  + findById(id): Promise<Ejercicio>
+  + findByIdWithRewards(id): Promise<Ejercicio>
+  + listActiveByUser(usuarioId): Promise<EjercicioActivo[]>
+  + upsertActive(usuarioId, ejercicioId): Promise<EjercicioActivo>
+  + markResolved(usuarioId, ejercicioId): Promise
+  + createResolvedAttempt(data, tx?): Promise<EjercicioResuelto>
+  + countSolved(usuarioId): Promise<number>
+  + withClient(client): PrismaClient
+}
+
+class UserRepository <<Repository>> {
+  + findById(id): Promise<Usuario>
+  + updatePoints(id, puntos): Promise<Usuario>
+}
+
+class CardRepository <<Repository>> {
+  + assignToUser(usuarioId, cartaId): Promise<UsuarioCarta>
+  + countByUser(usuarioId): Promise<number>
+}
+
+database PostgreSQL <<Supabase>> {
+}
+
+ExerciseService --> ExerciseRepository
+ExerciseService --> UserRepository
+ExerciseService --> CardRepository
+ExerciseRepository --> PostgreSQL : Prisma ORM
+UserRepository --> PostgreSQL : Prisma ORM
+CardRepository --> PostgreSQL : Prisma ORM
+
+note right of ExerciseRepository
+  withClient(tx?) permite pasar
+  una transacción de Prisma para
+  operaciones atómicas multi-tabla.
+end note
+
+@enduml

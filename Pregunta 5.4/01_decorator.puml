@@ -1,0 +1,62 @@
+﻿@startuml Decorator - Python Runner
+
+skinparam classAttributeIconSize 0
+skinparam backgroundColor white
+skinparam classBorderColor #444444
+skinparam classBackgroundColor #f5f5f5
+skinparam classFontColor #111111
+skinparam arrowColor #222222
+skinparam noteBackgroundColor #fffde7
+skinparam noteBorderColor #aaaaaa
+skinparam noteFontColor #333333
+
+title Patrón Decorator — Python Runner (Frontend)
+
+interface IPythonRunner {
+  + run(code: string, stdin: string): Promise<RunResult>
+}
+
+class BasePythonRunner {
+  + run(code, stdin): Promise<RunResult>
+  -- delega en runPython() / Pyodide --
+}
+
+abstract class RunnerDecorator {
+  # runner: IPythonRunner
+  + RunnerDecorator(runner: IPythonRunner)
+  + run(code, stdin): Promise<RunResult>
+}
+
+class StdinNormalizerDecorator {
+  + run(code, stdin): Promise<RunResult>
+  -- recorta espacios y líneas\nvacías del stdin --
+}
+
+class TimingDecorator {
+  + run(code, stdin): Promise<RunResult>
+  -- añade elapsedMs al resultado --
+}
+
+class createDefaultRunner <<function>> {
+  + (): IPythonRunner
+}
+
+IPythonRunner <|.. BasePythonRunner
+IPythonRunner <|.. RunnerDecorator
+RunnerDecorator <|-- StdinNormalizerDecorator
+RunnerDecorator <|-- TimingDecorator
+RunnerDecorator "1" o--> "1" IPythonRunner : wraps
+
+createDefaultRunner ..> TimingDecorator : crea
+createDefaultRunner ..> StdinNormalizerDecorator : crea
+createDefaultRunner ..> BasePythonRunner : crea
+
+note right of RunnerDecorator
+  Cadena de ejecución:
+  TimingDecorator
+    → StdinNormalizerDecorator
+      → BasePythonRunner
+        → Pyodide / WebAssembly
+end note
+
+@enduml

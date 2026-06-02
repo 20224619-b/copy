@@ -1,0 +1,169 @@
+@import 'tailwindcss';
+
+/* ============================================================
+   Cardly · Design tokens (Tailwind v4 @theme)
+   Translates the prototype CSS variables into Tailwind utilities.
+   Example: bg-bg-base, text-rar-legendaria, font-display.
+   ============================================================ */
+@theme {
+  --color-bg-base: #0a0e1a;
+  --color-bg-elevated: #111726;
+  --color-bg-card: #1a2238;
+  --color-bg-card-2: #20294a;
+
+  --color-accent-primary: #8b5cf6;
+  --color-accent-primary-2: #a78bfa;
+  --color-accent-cyan: #22d3ee;
+  --color-accent-gold: #fbbf24;
+  --color-accent-success: #10b981;
+  --color-accent-danger: #ef4444;
+
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+
+  --color-rar-comun: #94a3b8;
+  --color-rar-rara: #3b82f6;
+  --color-rar-epica: #a855f7;
+  --color-rar-legendaria: #f59e0b;
+
+  --font-display: 'Orbitron', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-shimmer-slide: shimmerSlide 2.6s var(--ease-out-expo) infinite;
+  --animate-float-card: floatCard 7s ease-in-out infinite;
+  --animate-float-up: floatUp 12s linear infinite;
+  --animate-legendary-sweep: legendarySweep 3.5s linear infinite;
+
+  @keyframes shimmerSlide {
+    0% { transform: translateX(-100%); }
+    60%, 100% { transform: translateX(100%); }
+  }
+  @keyframes floatCard {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  @keyframes floatUp {
+    0%   { transform: translateY(110%) translateX(0); opacity: 0; }
+    10%  { opacity: 0.5; }
+    90%  { opacity: 0.5; }
+    100% { transform: translateY(-20%) translateX(40px); opacity: 0; }
+  }
+  @keyframes legendarySweep {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Atmospheric background — used on top-level screens */
+.cardly-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 0%, rgba(139, 92, 246, 0.18), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(34, 211, 238, 0.10), transparent 60%),
+    var(--color-bg-base);
+}
+.cardly-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%);
+}
+
+/* Glassmorphism panel */
+.glass {
+  background: rgba(26, 34, 56, 0.6);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  border-radius: 16px;
+}
+
+/* Shimmer overlay for CTAs */
+.shimmer { position: relative; overflow: hidden; }
+.shimmer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.25) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: var(--animate-shimmer-slide);
+  pointer-events: none;
+}
+
+/* Particle dots floating up */
+.cardly-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+.cardly-particles span {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-accent-primary);
+  box-shadow: 0 0 10px var(--color-accent-primary);
+  opacity: 0.35;
+  animation: var(--animate-float-up);
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+/* Python syntax tokens — used by CodeEditor */
+.tok-kw      { color: #c084fc; }
+.tok-def     { color: #22d3ee; }
+.tok-builtin { color: #fbbf24; }
+.tok-str     { color: #34d399; }
+.tok-num     { color: #fb923c; }
+.tok-com     { color: #64748b; font-style: italic; }
+.tok-op      { color: #cbd5e1; }
+.tok-fn      { color: #60a5fa; }
+.tok-id      { color: #e2e8f0; }
+
+/* Result modal animations */
+@keyframes scaleIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes confettiFall {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+@keyframes legendaryPulse {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 12px rgba(245,158,11,0.5)); }
+  50% { filter: brightness(1.15) drop-shadow(0 0 24px rgba(245,158,11,0.85)); }
+}
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 0 0 currentColor; }
+  50% { box-shadow: 0 0 16px 4px currentColor; }
+}

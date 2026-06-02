@@ -1,0 +1,52 @@
+﻿@startuml Facade - RewardsFacade
+
+skinparam classAttributeIconSize 0
+skinparam backgroundColor white
+skinparam classBorderColor #444444
+skinparam classBackgroundColor #f5f5f5
+skinparam classFontColor #111111
+skinparam arrowColor #222222
+skinparam noteBackgroundColor #fffde7
+skinparam noteBorderColor #aaaaaa
+skinparam noteFontColor #333333
+
+title Patrón Facade — RewardsFacade (Backend)
+
+class ExerciseService <<Client>> {
+  + submitAttempt(params): Promise
+}
+
+class RewardsFacade <<Facade>> {
+  + applyAttemptOutcome(params): Promise<Outcome>
+  --
+  coordina todos los servicios
+  de recompensa en una sola llamada
+}
+
+class RewardService <<Subsystem>> {
+  + calculateRewards(ejercicio, correcto): RecompensaOtorgada[]
+  + grantRewards(tx, usuarioId, recompensas): void
+}
+
+class UserProgressService <<Subsystem>> {
+  + updateStreak(tx, usuarioId, correcto): number
+  + addPoints(tx, usuarioId, puntos): void
+}
+
+class CardService <<Subsystem>> {
+  + assignRandomCard(tx, usuarioId, carta): UsuarioCarta
+}
+
+ExerciseService --> RewardsFacade : applyAttemptOutcome()
+RewardsFacade --> RewardService
+RewardsFacade --> UserProgressService
+RewardsFacade --> CardService
+
+note right of RewardsFacade
+  ExerciseService hace UNA sola llamada.
+  La fachada coordina internamente
+  los 3 subsistemas sin exponer
+  su complejidad al llamador.
+end note
+
+@enduml

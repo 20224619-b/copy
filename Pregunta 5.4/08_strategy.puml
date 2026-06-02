@@ -1,0 +1,89 @@
+@startuml Strategy - Validador de Respuestas
+
+skinparam classAttributeIconSize 0
+skinparam backgroundColor white
+skinparam classBorderColor #444444
+skinparam classBackgroundColor #f5f5f5
+skinparam classFontColor #111111
+skinparam arrowColor #222222
+skinparam noteBackgroundColor #fffde7
+skinparam noteBorderColor #aaaaaa
+skinparam noteFontColor #333333
+
+title Patrón Strategy — Validador de Respuestas (Backend)
+
+class ExerciseService <<Client>> {
+  + submitAttempt(params): Promise
+  --
+  llama a validarRespuesta()
+  con tipo, respuesta y ejercicio
+}
+
+class validarRespuesta <<Context>> {
+  - estrategias: Map<string, IValidationStrategy>
+  --
+  + validarRespuesta({ tipo, respuesta, ejercicio })
+  --
+  estrategia = estrategias[tipo]
+  return estrategia.validar(...)
+}
+
+abstract class IValidationStrategy <<Strategy>> {
+  + validar({ respuesta, ejercicio }): Result
+  --
+  throws Error si no se implementa
+}
+
+class CodigoValidationStrategy <<ConcreteStrategy>> {
+  - normalizarCodigo(s): string
+  --
+  + validar({ respuesta, ejercicio }): Result
+  --
+  Compara codigo normalizado
+  contra solucionesCodigo[]
+  (ignora comentarios y espacios)
+}
+
+class OutputValidationStrategy <<ConcreteStrategy>> {
+  - normalizarTexto(s): string
+  --
+  + validar({ respuesta, ejercicio }): Result
+  --
+  Compara outputs reales
+  contra casosPrueba[].outputEsperado
+  (acepta string o string[])
+}
+
+class Result <<(D,#34d399) Data>> {
+  + correcto: boolean
+  + motivo: string
+}
+
+ExerciseService --> validarRespuesta : llama con tipo="output"
+validarRespuesta o--> IValidationStrategy : selecciona por tipo
+IValidationStrategy <|-- CodigoValidationStrategy
+IValidationStrategy <|-- OutputValidationStrategy
+IValidationStrategy ..> Result : retorna
+
+note right of validarRespuesta
+  const estrategias = {
+    codigo: new CodigoValidationStrategy(),
+    output: new OutputValidationStrategy(),
+  }
+end note
+
+note bottom of CodigoValidationStrategy
+  tipo = "codigo"
+  Usado como fallback.
+  Normaliza: sin comentarios,
+  sin espacios, lowercase.
+end note
+
+note bottom of OutputValidationStrategy
+  tipo = "output"
+  Modo principal del sistema.
+  Acepta array de outputs
+  (uno por caso de prueba).
+end note
+
+@enduml

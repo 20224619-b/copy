@@ -1,0 +1,64 @@
+﻿@startuml Builder - ExerciseGuideBuilder
+
+skinparam classAttributeIconSize 0
+skinparam backgroundColor white
+skinparam classBorderColor #444444
+skinparam classBackgroundColor #f5f5f5
+skinparam classFontColor #111111
+skinparam arrowColor #222222
+skinparam noteBackgroundColor #fffde7
+skinparam noteBorderColor #aaaaaa
+skinparam noteFontColor #333333
+
+title Patrón Builder — ExerciseGuideBuilder (Frontend)
+
+class EjercicioDetail <<(D,#a78bfa) Data>> {
+  + id: number
+  + titulo: string
+  + descripcion: string
+  + lenguaje: string
+  + casosPrueba: CasoPrueba[]
+}
+
+class ExerciseGuideBuilder {
+  - guide: ExerciseGuideModel
+  --
+  + {static} create(ejercicio: EjercicioDetail): ExerciseGuideBuilder
+  + withExample(caso?: CasoPrueba): ExerciseGuideBuilder
+  + withLanguageRules(): ExerciseGuideBuilder
+  + withSmartInputHint(): ExerciseGuideBuilder
+  + build(): ExerciseGuideModel
+}
+
+class ExerciseGuideModel <<(M,#34d399) Model>> {
+  + titulo: string
+  + descripcion: string
+  + lenguaje: string
+  + entradaTexto: string
+  + salidaTexto: string
+  + editorTexto: string
+  + pruebaTexto: string
+  + stdinHint: string
+  + ejemplo?: ExerciseGuideExample
+}
+
+class ResolverPage <<(C,#22d3ee) Component>> {
+  - exerciseGuide: ExerciseGuideModel
+  --
+  + render(): JSX
+}
+
+EjercicioDetail ..> ExerciseGuideBuilder : input
+ExerciseGuideBuilder --> ExerciseGuideModel : «builds»
+ResolverPage ..> ExerciseGuideBuilder : usa (useMemo)
+ResolverPage --> ExerciseGuideModel : consume
+
+note bottom of ExerciseGuideBuilder
+  withSmartInputHint() detecta el formato
+  del input del caso de prueba:
+  • "2 3" → recomienda .split()
+  • "2\n3" → recomienda input() × 2
+  • "5" → recomienda input() simple
+end note
+
+@enduml

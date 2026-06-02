@@ -1,0 +1,58 @@
+﻿@startuml Observer - Sistema de Eventos
+
+skinparam classAttributeIconSize 0
+skinparam backgroundColor white
+skinparam classBorderColor #444444
+skinparam classBackgroundColor #f5f5f5
+skinparam classFontColor #111111
+skinparam arrowColor #222222
+skinparam noteBackgroundColor #fffde7
+skinparam noteBorderColor #aaaaaa
+skinparam noteFontColor #333333
+
+title Patrón Observer — Bus de Eventos (Backend)
+
+interface IObserver {
+  + handleExerciseCompleted(payload): void
+}
+
+class EventEmitter <<Subject>> {
+  + emit(event: string, payload): void
+  + on(event: string, listener): void
+}
+
+class ExerciseService <<Publisher>> {
+  + submitAttempt(params): Promise
+  --
+  emite EXERCISE_COMPLETED
+  al finalizar un intento
+}
+
+class RewardsListener <<Observer>> {
+  + listen(): void
+  - handleExerciseCompleted(payload): void
+  --
+  otorga recompensas al usuario
+}
+
+class CachingRankingDecorator <<Observer>> {
+  + invalidate(): void
+  --
+  invalida la caché del ranking
+}
+
+IObserver <|.. RewardsListener
+IObserver <|.. CachingRankingDecorator
+
+ExerciseService --> EventEmitter : emit(EXERCISE_COMPLETED)
+EventEmitter --> RewardsListener : notifica
+EventEmitter --> CachingRankingDecorator : notifica
+
+note bottom of EventEmitter
+  Los observers se suscriben en el
+  arranque de la app (index.js).
+  ExerciseService no sabe quién
+  escucha — bajo acoplamiento.
+end note
+
+@enduml

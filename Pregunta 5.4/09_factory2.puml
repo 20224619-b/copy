@@ -1,0 +1,90 @@
+@startuml FACTORY 2 - RewardFactory
+
+skinparam classAttributeIconSize 0
+skinparam backgroundColor white
+skinparam classBorderColor #444444
+skinparam classBackgroundColor #f5f5f5
+skinparam classFontColor #111111
+skinparam arrowColor #222222
+skinparam noteBackgroundColor #fffde7
+skinparam noteBorderColor #aaaaaa
+skinparam noteFontColor #333333
+
+title Patron Factory Method — RewardFactory (Backend)
+
+class rewardService <<Client>> {
+  + applyAttemptOutcome(params)
+  --
+  for each recompensa:
+    reward = RewardFactory.create()
+    reward.apply(...)
+}
+
+class RewardFactory <<Creator>> {
+  + {static} create(recompensa): Reward
+  --
+  switch(recompensa.tipo)
+  PUNTOS  -> PointsReward
+  MONEDAS -> CoinsReward
+  CARTA   -> CardReward
+  default -> NullReward
+}
+
+abstract class Reward <<Product>> {
+  # recompensa: object
+  --
+  + apply({ tx, usuarioId, ejercicio }): Result
+  # _applyIncrement({ tx, usuarioId,\n  ejercicio, campo, tipo }): Result
+}
+
+class PointsReward <<ConcreteProduct>> {
+  + apply({ tx, usuarioId, ejercicio })
+  --
+  incrementa campo "puntos"
+  emite REWARD_ASSIGNED
+}
+
+class CoinsReward <<ConcreteProduct>> {
+  + apply({ tx, usuarioId, ejercicio })
+  --
+  incrementa campo "monedas"
+  emite REWARD_ASSIGNED
+}
+
+class CardReward <<ConcreteProduct>> {
+  + apply({ tx, usuarioId, ejercicio })
+  --
+  obtiene carta aleatoria
+  emite CARD_OBTAINED
+  emite REWARD_ASSIGNED
+}
+
+class NullReward <<ConcreteProduct>> {
+  + apply({ tx, usuarioId, ejercicio })
+  --
+  no hace nada (Null Object)
+  evita null-checks en el cliente
+}
+
+rewardService --> RewardFactory : create(recompensa)
+RewardFactory ..> Reward : <<creates>>
+Reward <|-- PointsReward
+Reward <|-- CoinsReward
+Reward <|-- CardReward
+Reward <|-- NullReward
+rewardService --> Reward : apply()
+
+note right of NullReward
+  Patron Null Object combinado:
+  tipo desconocido devuelve
+  rewards=[] sin romper el flujo
+end note
+
+note right of Reward
+  Result = {
+    rewards: [...],
+    emittedEvents: [...]
+  }
+end note
+
+@enduml

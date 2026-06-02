@@ -1,0 +1,64 @@
+﻿@startuml Factory - RecompensaUIFactory
+
+skinparam classAttributeIconSize 0
+skinparam backgroundColor white
+skinparam classBorderColor #444444
+skinparam classBackgroundColor #f5f5f5
+skinparam classFontColor #111111
+skinparam arrowColor #222222
+skinparam noteBackgroundColor #fffde7
+skinparam noteBorderColor #aaaaaa
+skinparam noteFontColor #333333
+
+title Patrón Factory — RecompensaUIFactory (Frontend)
+
+class RecompensaSpec <<(D,#a78bfa) Data>> {
+  + tipo: "PUNTOS" | "MONEDAS" | "CARTA"
+  + cantidad: number
+  + probabilidad: string
+}
+
+class RecompensaUIFactory <<(F,#fbbf24) Factory>> {
+  + {static} create(recompensa: RecompensaSpec): ReactNode
+  -- switch(recompensa.tipo) --
+}
+
+class PuntosRow <<(C,#a78bfa) Component>> {
+  + icon: IconBolt
+  + color: "#a78bfa"
+  + label: "Puntos"
+}
+
+class MonedasRow <<(C,#fbbf24) Component>> {
+  + icon: IconFlame
+  + color: "#fbbf24"
+  + label: "Monedas"
+}
+
+class CartaRow <<(C,#c084fc) Component>> {
+  + icon: IconCard
+  + color: "#c084fc"
+  + label: "Carta aleatoria"
+}
+
+class RecompensaHint <<(C,#22d3ee) Component>> {
+  + recompensas: RecompensaSpec[]
+  --
+  itera y delega a la fábrica
+}
+
+RecompensaSpec --> RecompensaUIFactory : input
+RecompensaUIFactory ..> PuntosRow : tipo = PUNTOS
+RecompensaUIFactory ..> MonedasRow : tipo = MONEDAS
+RecompensaUIFactory ..> CartaRow : tipo = CARTA
+RecompensaHint ..> RecompensaUIFactory : usa
+
+note right of RecompensaUIFactory
+  El cliente (RecompensaHint) solo
+  itera la lista y delega la creación
+  del componente visual a la fábrica.
+  Agregar un tipo nuevo no requiere
+  modificar RecompensaHint.
+end note
+
+@enduml
